@@ -1,0 +1,348 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>D3 tutorial</title>
+	<script src='http://d3js.org/d3.v3.min.js'></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+	<link rel="stylesheet" type="text/css" href="colorbrewer.css">
+	<style>
+h1{
+		font-family: Helvetica;
+		text-align: center;
+		top:3%;
+	}
+svg{
+		margin-top:-5%;
+	}
+
+.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 60px;                  
+  height: 28px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  background: lightsteelblue;   
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none; 
+  vertical-align: middle;        
+}
+.legend{
+	opacity: .8;
+}
+	</style>
+</head>
+
+<body>
+<h1>Progress Report Score by District</h1>
+<script>
+// var dataArray = [20,40,50,60]
+// 	width = 500
+// 	height = 500;
+
+// var widthScale = d3.scale.linear()
+// 				.domain([0, 60])
+// 				.range([0, width]);
+
+// var color = d3.scale.linear()
+// 			.domain([0,60])
+// 			.range(["red","steelblue"]);
+
+// var axis = d3.svg.axis()
+// 			.ticks(5) // how many ticks you want not the variance between ticks
+// 			.scale(widthScale);
+
+
+// var canvas = d3.select("body")
+// 	.append("svg")
+// 	.attr("width",width)
+// 	.attr("height",height)
+	// .append("g") // g stands for group which creates "g" containers for the svg allowing transformations
+	// .attr("transform", "translate(20, 0)");
+	 //call literally calls a variable
+
+
+// var bars = canvas.selectAll("rect")
+// 	.data(dataArray)
+// 	.enter()
+// 	.append("rect")
+// 	.attr("width", function (d) {return widthScale(d);})
+// 	.attr("height", 50)
+// 	.attr("y", function(d,i) { return i * 70 })
+// 	.style("fill", function (d) { return color(d) });
+
+// 	canvas.append("g")
+// 		.attr("transform", "translate(0, 300)")
+// 		.call(axis);
+
+
+
+// NEW CODE FOR TUTORIAL //
+
+// DOM elements < data elements (enter)
+// DOM elements > data elements (exit)
+// DOM elements = data elements (update)
+
+// var data = [10];
+
+// var canvas = d3.select("body")
+// 	.append("svg")
+// 	.attr("width",500)
+// 	.attr("height",500);
+
+// var circle = canvas.append("circle")
+// 				.attr("cx", 50)
+// 				.attr("cy", 100)
+// 				.attr("r", 25);
+
+
+
+// 	circle.transition()
+// 		.duration(1500)
+// 		.attr("cx", 150) // will cause the circle to slide across the screen
+// 		.each("end", function () { d3.select(this).attr("fill", "steelblue"); }); //this refers to the element were using, in this case the circle
+
+// NEW CODE FOR TUTORIAL //
+
+// HOW TO LOAD DATA //
+
+// d3.json("data.json", function (data) {
+
+// 	var canvas = d3.select("body").append("svg")
+// 	.attr("width", 500)
+// 	.attr("height", 500)
+
+// 	canvas.selectAll("rect")
+// 		.data(data)
+// 		.enter()
+// 			.append("rect")
+// 			.attr("width", function (d) {return d.age * 10; }) //references the age property of our element
+// 			.attr("height", 48)
+// 			.attr("y", function (d,i) { return i * 50; })
+// 			.attr("fill", "blue")
+
+// 	canvas.selectAll("text")
+// 		.data(data)
+// 		.enter()
+// 			.append("text")
+// 			.attr("fill", "white")
+// 			.attr("y", function (d,i) {return i * 50 + 24; }) // i = index which "separates" each data point
+// 			.text(function (d) {return d.name ;})
+
+
+// } ) 
+// the function here is a callback function which means that all the code within the brackets will be loaded once the data is loaded. all code that is dependent on the data being available should be contained with the callback function.
+
+// NEW CODE
+// // creates lines that can be used for line charts
+
+// 	var canvas = d3.select("body").append("svg")
+// 	.attr("width", 500)
+// 	.attr("height", 500);
+
+// 	var data = [
+// 		{ x: 10, y: 20 },
+// 		{ x: 40, y: 60 },
+// 		{ x: 50, y: 70 },
+// 		{ x: 60, y: 150 },
+// 		{ x: 1000, y: 150 }
+// 	];
+
+// 	var group = canvas.append("g")
+// 				.attr("transform", "translate(100, 100)");
+
+// 	var line = d3.svg.line()
+// 		.x(function (d) { return d.x; })
+// 		.y(function (d) { return d.y; });	
+
+// 		group.selectAll("path")
+// 				.data([data])
+// 				.enter()
+// 				.append("path")
+// 				.attr("d", line)
+// 				.attr("fill", "none")
+// 				.attr("stroke", "steelblue")
+// 				.attr("stroke-width", 5)
+
+
+// NEW CODE
+// arcs - the following code creates a circle
+
+	// var canvas = d3.select("body").append("svg")
+	// .attr("width", 500)
+	// .attr("height", 500);
+
+	// var group = canvas.append("g")
+	// 			.attr("transform", "translate(100, 100)");
+
+	// var r = 100
+	// 	p = Math.PI * 2;
+
+	// var arc = d3.svg.arc()
+	// 	.innerRadius(r-20)
+	// 	.outerRadius(r)
+	// 	.startAngle(0)
+	// 	.endAngle(p)
+
+	// 	group.append("path")
+	// 		.attr("d", arc)
+
+// NEW CODE 
+// TREE LAYOUT
+
+	// var canvas = d3.select("body").append("svg")
+	// .attr("width", 500)
+	// .attr("height", 500);
+
+	// var diagonal = d3.svg.diagonal() // source object describes starting point of path, target describes ending point of path
+	// 				.source({x:10, y:10})
+	// 				.target({x:300, y:300});
+
+
+	// canvas.append("path")
+	// 		.attr("fill", "none")
+	// 		.attr("stroke", "steelblue")
+	// 		.attr("stroke-width", 25)
+	// 		.attr("d", diagonal);
+
+	// var canvas = d3.select("body")
+	// 				.append("svg")
+	// 				.attr("width", 500)
+	// 				.attr("height", 500)
+	// 				.append("g")
+	// 					.attr("transform", "translate(50, 50)");
+
+	// var tree = d3.layout.tree()
+	// 			.size([400, 400])
+
+	// d3.json("mydata.json", function (data) {
+
+	// 	var nodes = tree.nodes(data);
+	// 	var links = tree.links(nodes); // creates the paths between nodes
+
+	// 	var node = canvas.selectAll(".node")
+	// 		.data(nodes)
+	// 		.enter()
+	// 		.append("g")
+	// 			.attr("class", "node")
+	// 			.attr("transform", function (d) { return "translate(" + d.y + "," + d.x + ")";}) // places the circles/nodes
+
+	// 		node.append("circle")
+	// 			.attr("r", 5)
+	// 			.attr("fill", "steelblue")
+
+	// 		node.append("text")
+	// 			.text(function (d) { return d.name; })
+
+	// 		var diagonal = d3.svg.diagonal()
+	// 							.projection(function (d) { return [d.y, d.x];}) // default is d.x, d.y we just roated them
+
+	// 		canvas.selectAll(".link")
+	// 				.data(links)
+	// 				.enter()
+	// 				.append("path")
+	// 				.attr("class", "link")
+	// 				.attr("fill", "none")
+	// 				.attr("stroke", "#ADADAD")
+	// 				.attr("d", diagonal);
+	// })
+
+// NEW CODE
+// MAPS
+
+
+	var div = d3.select("body").append("div")   
+    	.attr("class", "tooltip")               
+    	.style("opacity", 0);
+
+	var canvas = d3.select("body").append("svg")
+		.attr("width", 1000)
+		.attr("height", 1000)
+
+	var color =  d3.scale.linear()
+		.domain([0, .5, 1].map(d3.interpolate(48.5, 73)))
+		.range(["white", "steelblue"]);
+
+
+		d3.json("school_districts.geojson", function (data) {
+			data = data
+			datas = data.features.sort( function(a,b) { return a.properties.ProgScore - b.properties.ProgScore; });
+
+	var group = canvas.selectAll("g")
+		.data(data.features)
+		.enter()
+		.append("g")
+
+
+
+	var projection = d3.geo.mercator().scale(60000).translate([77900,47100]); //10000 and 13300, 7880 work - scale(30000).translate([38900,23640]) translate([x,y]) for y, a higher translates the element down
+	var path = d3.geo.path().projection(projection);
+
+	var areas = group.append("path")
+		.attr("d", path)
+		.attr("class", "area")
+		.style("fill", function (d) { return color(d.properties.ProgScore); })
+	    .on("mouseover", function(d) {      
+        div.transition()        
+            .duration(200)      
+            .style("opacity", .9);      
+        div.html("Score" + "<br>"+d.properties.ProgScore)  
+            .style("left", (d3.event.pageX) + "px")     
+            .style("top", (d3.event.pageY - 28) + "px") 
+          })
+        .on("mouseout", function(d) {       
+            div.transition()        
+                .duration(500)      
+                .style("opacity", 0)
+                }) ; 	
+
+		group.append("text")
+			.attr("x", function (d) { return path.centroid(d)[0]; })
+			.attr("y", function (d) { return path.centroid(d)[1]; })
+			.text(function (d) { return d.properties.SchoolDist; })
+			.style("font-family", "Helvetica")
+			.style("font-size", 10);
+
+	var legend = d3.select("body").append("svg")
+		.attr("class", "legend")
+		.attr("width", 150)
+		.attr("height", 800)
+		.selectAll("g")
+			.data(data.features)
+			.enter().append("g")
+			.attr("transform", function(d, i) { return "translate(30," + i * 3 + ")"; });
+
+  
+		legend.append("rect")
+			.attr("width", 28)
+			.attr("height", 6)
+			.style("fill", function (d) { return color(d.properties.ProgScore); });
+
+		legend.append("text")
+			.text(function (d)  {
+				if (d.properties.ProgScore == d3.max(data)) 
+				{
+					return "High Score"
+				} 
+			})
+			.attr("transform", function(d) { return "translate(30,10)"; })
+			.attr("font-size", 12)
+
+		legend.append("text")
+			.text(function (d)  {
+				if ( d.properties.ProgScore == d3.min(data)) 
+				{ 
+					return "Low Score"
+				} 
+			})
+			.attr("transform", function(d) { return "translate(30,-88)"; })
+			.attr("font-size", 12);
+
+	});
+// if max then "best score" elif min then "low score"
+
+</script>
+</body>
+</html>

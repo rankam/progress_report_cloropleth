@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="http://d3js.org/d3.v2.js"></script>
+   <style>
+  #chart-container {
+    width: 1000px; 
+    margin: 0 auto 50px auto;
+    background: rgba(255,255,255,0.5);
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    padding: 20px 30px;
+}
+ 
+#chart-container h2 {
+    color: #444;
+    margin: 0 0 10px;
+    font-weight: 300;
+    padding: 10px;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+    font-size: 24px;
+}
+g.context g.axis path{ stroke-opacity: 0;}
+g.context g.axis line{ stroke-opacity: .1;}
+ 
+g.context g.brush rect.background{ fill: rgba(0,0,0,.1);}
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+ 
+g.context rect.background{
+    fill: rgb(200,200,255);
+    visibility: visible !important;
+}
+g.france path.chart{ fill: rgba(127,201,127,0.5);}
+g.germany path.chart{ fill: rgba(127,201,174,0.5);}
+g.japan path.chart{ fill: rgba(127,183,201,0.5);}
+g.uk path.chart{ fill: rgba(127,130,201,0.5);}
+g.usa path.chart{ fill: rgba(171,127,201,0.5);}
+             
+.axis path, .axis line {
+    fill: none;
+    stroke: #aaa;
+    shape-rendering: crispEdges;
+}
+</style>
+</head>
+<body>
+    <div id="chart-container">
+        <h1>Electricity Consumption per capita</h1>
+    </div>
+    <script>
+var margin = {top:10,right:40,bottom:150, left:60},
+	width = 940 - margin.left - margin.right,
+	height = 500 - margin.top - margin.bottom,
+	contextHeight = 50;
+	contextWidth = width * .5;
+
+var svg = d3.select("#chart-container")
+	.append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", (height + margin.top + margin.bottom));
+
+d3.csv('data.csv', createChart);
+
+function createChart(data){
+	var countries = [],
+		charts = [],
+		maxDataPoint = 0;
+
+//After the CSV file loads, we’ll want to loop through the first row to grab each country. We’ll store it in an array to use later.//
+
+for (var prop in data[0]) {
+	if (data[0].hasOwnProperty(prop)) {
+		if (prop != 'Year'){
+			countries.push(prop);
+		}
+	}
+};
+
+var countriesCount = countries.length,
+	startYear = data[0].Year,
+	endYear = data[data.length -1].Year,
+	chartHeight = height * (1/countriesCount);
+
+//loop through the entire data set to ensure that every value is a number while converting the year value to a JavaScript Date object. We’ll also want to find the maximum data point. We’ll use this later to set the y-axis scale.//
+
+data.forEach(function(d) {
+	for (var prop in d) {
+		if (d.hasOwnProperty(prop)) {
+			d[prop] = parseFloat(d[prop]);
+
+			if (d[prop] > maxDataPoint) {
+				maxDataPoint = d[prop];
+			}
+		}
+	}
+
+	// d3 needs a date object
+	d.Year = new Date(d.Year,0,1);
+});
+
+for(var i=0; i < countriesCount; i++){
+	charts.push(new Chart({
+		data: data.slice(), //copy array
+		id: i,
+		name: countries[i],
+		width: width,
+		height: height * (1/ countriesCount),
+		maxDataPoint: maxDataPoint,
+		svg: svg,
+		margin: margin,
+		showBottomAxis: ( i == countries.length -1)
+	}));
+}
+	
+var contextXScale = d3.time.scale()
+					.range([0, contextWidth])
+					.domain(charts[0].xScale.domain());
+var contextAxis = d3.svg.axis()
+				.scale(contextXScale)
+				.tickSize(contextHeight)
+				.tickPadding(-10)
+				.orient("bottom");
+
+var contextArea = d3.svg.area()
+				.interpolate("monotone")
+				.x(function(d) { return contextXScale(d.date); })
+				.y0(contextHeight)
+				.y1(0);
+
+var brush = d3.svg.brush()
+			.x(contextXScale)
+			.on("brush", onBrush);
+
+var brush = d3.svg.brush()
+			.x(contextXScale)
+
+var context = svg.append("g")
+	.attr("class","context")
+	.attr("transform", "translate(" + (margin.left + width * .25) + "," + (height + margin.top + chartHeight) + ")");
+
+context.append("g")
+	.attr("class", "x axis top")
+	.attr("transform", "translate(0,0)")
+	.call(contextAxis);
+
+function onBrush(){
+	//this will return a date range to pass into the chart object//
+
+	var b = brush.empty() ? contextXScale.domain() : brush.extent();
+
+	for(var i = 0; i < countriesCount; i++){
+		charts[i].showOnly(b);
+	}
+}
+}
+
+function Chart(options){
+	this.chartData = options.data;
+	this.width = options.width;
+	this.height = options.height;
+	this.maxDataPoint = options.maxDataPoint;
+	this.svg = options.svg;
+	this.id = options.id;
+	this.name = options.name;
+	this.margin = options.margin;
+	this.showBottomAxis = options.showBottomAxis;
+
+	var localName = this.name;
+
+//Next we need to create the scales. Scales can be time-based or
+//quantitative (linear, log, or power). since our x-axis is going 
+//to represent the years, we will use a time-based scale. The y-
+//axis represents thte consumption, so wwll use a linear scale. //
+
+//For scales to be useful, they need to have a range and adomain. 
+//Both range and domain accdept ana array of two or more numbers. //
+
+//The domain represents the minimum and maximum input values
+
+//The range is the minimum and maximum values for the output
+//We want the charts to be 840px (this.width). 
+//So if we set the range [0,this.width], D3 will use this as the output for the domain
+//1960(year) will have an output of 0 (it's the first year) while 2008 will have an output value of 840. 
+// If our domain was [200,400], then 2008 would have an output value of 400 and 1960 would have an output of 200
+
+
+/* XScale is time based */
+this.xScale = d3.time.scale()
+			.range([0, this.width])
+			.domain(d3.extent(this.chartData.map(function(d) { return d.Year; })));
+
+/* YScale is linear based on maxData Point we found earlier 
+*/
+this.yScale = d3.scale.linear()
+			.range([this.height,0])
+			.domain([0,this.maxDataPoint]);
+
+// The area call is what crates the chart. There are a number of interpolation options we can use. 'Basis' is the smoothest, however, when working with a lot data it will also be the slowest.
+
+var xS = this.xScale;
+var yS = this.yScale;
+
+this.area = d3.svg.area()
+			.interpolate("basis")
+			.x(function(d) { return xS(d.Year); })
+			.y0(this.height)
+			.y1(function(d) { return yS(d[localName]); });
+
+//create a definition with which to display the chart.
+//here, it creates a container for the chart, without it, we would see the chart go off the left and under the y-axis when zooming and panning. 
+
+this.svg.append("defs").append("clipPath")
+	.attr("id", "clip-" + this.id)
+	.append("rect")
+	.attr("width", this.width)
+	.attr("height", this.height);
+
+/*
+Assign it a class so we can assign a fill color and position it on the page
+*/
+
+this.chartContainer = svg.append("g")
+	.attr('class', this.name.toLowerCase())
+	.attr("transform", "translate(" + this.margin.left + "," + (this.margin.top + (this.height * this.id) + (10 * this.id)) + ")");
+//everything's created, let's add it to the page
+
+this.chartContainer.append("path")
+	.data([this.chartData])
+	.attr("class", "chart")
+	.attr("clip-path", "url(#clip-" + this.id + ")")
+	.attr("d", this.area);
+
+this.xAxisTop = d3.svg.axis().scale(this.xScale).orient("bottom");
+this.xAxisBottom = d3.svg.axis().scale(this.xScale).orient("top");
+ 
+/* We only want a top axis if it's the first country */
+ 
+if(this.id == 0){
+    this.chartContainer.append("g")
+            .attr("class", "x axis top")
+            .attr("transform", "translate(0,0)")
+            .call(this.xAxisTop);
+}
+                             
+/* Only want a bottom axis on the last country */
+ 
+if(this.showBottomAxis){
+    this.chartContainer.append("g")
+        .attr("class", "x axis bottom")
+        .attr("transform", "translate(0," + this.height + ")")
+        .call(this.xAxisBottom);
+}  
+                                 
+this.yAxis = d3.svg.axis().scale(this.yScale).orient("left").ticks(5);
+                                 
+                            this.chartContainer.append("g")
+            .attr("class", "y axis")
+            .attr("transform", "translate(-15,0)")
+            .call(this.yAxis);
+                    this.chartContainer.append("text")
+            .attr("class","country-title")
+            .attr("transform", "translate(15,40)")
+            .text(this.name);
+                             
+}
+
+
+Chart.prototype.showOnly = function(b){
+    this.xScale.domain(b);
+    this.chartContainer.select("path").data([this.chartData]).attr("d", this.area);
+    this.chartContainer.select(".x.axis.top").call(this.xAxisTop);
+    this.chartContainer.select(".x.axis.bottom").call(this.xAxisBottom);
+};
+    </script>
+</body>
+</html>
