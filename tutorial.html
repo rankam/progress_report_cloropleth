@@ -258,7 +258,7 @@ svg{
     	.style("opacity", 0);
 
 	var canvas = d3.select("body").append("svg")
-		.attr("width", 1000)
+		.attr("width", 800)
 		.attr("height", 1000)
 
 	var color =  d3.scale.linear()
@@ -274,8 +274,6 @@ svg{
 		.data(data.features)
 		.enter()
 		.append("g")
-
-
 
 	var projection = d3.geo.mercator().scale(60000).translate([77900,47100]); //10000 and 13300, 7880 work - scale(30000).translate([38900,23640]) translate([x,y]) for y, a higher translates the element down
 	var path = d3.geo.path().projection(projection);
@@ -312,7 +310,7 @@ svg{
 		.selectAll("g")
 			.data(data.features)
 			.enter().append("g")
-			.attr("transform", function(d, i) { return "translate(30," + i * 3 + ")"; });
+			.attr("transform", function(d, i) { return "translate(0," + i * 3 + ")"; });
 
   
 		legend.append("rect")
@@ -322,7 +320,7 @@ svg{
 
 		legend.append("text")
 			.text(function (d)  {
-				if (d.properties.ProgScore == d3.max(data)) 
+				if ( d.properties.ProgScore == d3.max(data) ) 
 				{
 					return "High Score"
 				} 
@@ -332,7 +330,7 @@ svg{
 
 		legend.append("text")
 			.text(function (d)  {
-				if ( d.properties.ProgScore == d3.min(data)) 
+				if ( d.properties.ProgScore == d3.min(data) ) 
 				{ 
 					return "Low Score"
 				} 
